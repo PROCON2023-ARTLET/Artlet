@@ -1,8 +1,7 @@
-import 'dart:ui';
-import 'package:app/screens/score_page.dart';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-
+import 'package:screenshot/screenshot.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 
 void main() {
   runApp(DrawingApp());
@@ -18,31 +17,6 @@ class DrawingApp extends StatelessWidget {
   }
 }
 
-// Widget build(BuildContext context) => ElevatedButton{
-//   style:ElevatedButton,styleFrom(
-//     primary:backgroundColor,
-//     padding: EdgeInsets.symmetric(horizontal:32, vertical:16,)
-//   )
-//   child:Text(
-//     text,
-//     style:TextStyle(frontSize:20)
-//   )
-//   onPressed: onClicked,
-// };
-
-// void startTimer() {
-//   _timer?.cancel(); // Cancel any existing timer
-//   _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-//     setState(() {
-//       if (countdown > 0) {
-//         countdown--;
-//       } else {
-//         _timer?.cancel();
-//       }
-//     });
-//   });
-// }
-
 class DrawingScreen extends StatefulWidget {
   @override
   _DrawingScreenState createState() => _DrawingScreenState();
@@ -51,6 +25,25 @@ class DrawingScreen extends StatefulWidget {
 class _DrawingScreenState extends State<DrawingScreen> {
   List<List<Offset>> points = [];
   Color selectedColor = Colors.black;
+  final ScreenshotController screenshotController = ScreenshotController();
+
+  // Create a method to capture the screen
+  Future<void> _captureScreen() async {
+    try {
+      final Uint8List? imageUint8List = await screenshotController.capture();
+      if (imageUint8List != null) {
+        // Save the image to the gallery
+        final result = await ImageGallerySaver.saveImage(imageUint8List);
+        if (result['isSuccess']) {
+          print('Image saved to gallery');
+        } else {
+          print('Failed to save image: ${result['errorMessage']}');
+        }
+      }
+    } catch (e) {
+      print('Error capturing screen: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,89 +51,61 @@ class _DrawingScreenState extends State<DrawingScreen> {
       appBar: AppBar(
         title: Text('Drawing Section'),
         actions: <Widget>[
-          // Color options in the app bar
           IconButton(
-            icon: Icon(Icons.color_lens),
-            onPressed: _showColorPicker,
+            icon: Icon(Icons.camera),
+            onPressed: _captureScreen,
+          ),
+          IconButton(
+            icon: Icon(Icons.clear),
+            onPressed: () => setState(() => points.clear()),
+          ),
+          IconButton(
+            icon: Icon(Icons.score),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ScorePage()),
+              );
+            },
           ),
         ],
       ),
-      body: Container(
-        color: Color.fromARGB(255, 255, 255, 255), // Set the background color to blue
-        child: Stack(
-          children: [
-            GestureDetector(
-              onPanStart: (details) {
-                setState(() {
-                  points.add([details.localPosition]); // Create a new list for each line
-                });
-              },
-              onPanUpdate: (details) {
-                setState(() {
-                  if (points.isNotEmpty) {
-                    points.last.add(details.localPosition); // Add points to the last line
-                  }
-                });
-              },
-              onPanEnd: (details) {
-                setState(() {
-                  points.add([]); // Add an empty list as a separator
-                });
-              },
-              child: CustomPaint(
-                painter: _DrawingPainter(points, selectedColor),
-                child: Container(
-                  height: MediaQuery.of(context).size.height,
-                  width: MediaQuery.of(context).size.width,
+      body: Screenshot(
+        controller: screenshotController,
+        child: Container(
+          color: Color.fromARGB(255, 255, 255, 255),
+          child: Stack(
+            children: [
+              GestureDetector(
+                onPanStart: (details) {
+                  setState(() {
+                    points.add([details.localPosition]);
+                  });
+                },
+                onPanUpdate: (details) {
+                  setState(() {
+                    if (points.isNotEmpty) {
+                      points.last.add(details.localPosition);
+                    }
+                  });
+                },
+                onPanEnd: (details) {
+                  setState(() {
+                    points.add([]);
+                  });
+                },
+                child: CustomPaint(
+                  painter: _DrawingPainter(points, selectedColor),
+                  child: Container(
+                    height: MediaQuery.of(context).size.height,
+                    width: MediaQuery.of(context).size.width,
+                  ),
                 ),
               ),
-            ),
-            Positioned(
-              top: 40,
-              right: 30,
-              child: ElevatedButton.icon(
-                onPressed: () => setState(() => points.clear()),
-                icon: Icon(Icons.clear),
-                label: Text("Clear Board"),
-              ),
-            ),
-            Positioned(
-              top: 80,
-              right: 30,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => ScorePage()));
-                },
-                icon: Icon(Icons.score),
-                label: Text("Score"),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    );
-  }
-
-  // Show color picker dialog
-  void _showColorPicker() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Select a Color"),
-          content: SingleChildScrollView(
-            child: BlockPicker(
-              pickerColor: selectedColor,
-              onColorChanged: (Color color) {
-                setState(() {
-                  selectedColor = color;
-                });
-                Navigator.of(context).pop(); // Close the color picker dialog
-              },
-            ),
-          ),
-        );
-      },
     );
   }
 }
@@ -162,7 +127,7 @@ class _DrawingPainter extends CustomPainter {
           Paint()
             ..color = color
             ..isAntiAlias = true
-            ..strokeWidth = 5.0 // Set a fixed stroke width
+            ..strokeWidth = 5.0
             ..strokeCap = StrokeCap.round,
         );
       }
@@ -172,5 +137,19 @@ class _DrawingPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return true;
+  }
+}
+
+class ScorePage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Score Page'),
+      ),
+      body: Center(
+        child: Text('Your score goes here!'),
+      ),
+    );
   }
 }
