@@ -1,6 +1,8 @@
+// ignore_for_file: depend_on_referenced_packages
+
 import 'package:flutter/material.dart';
-import 'package:app/screens/score_page.dart';
-import 'package:app/screens/turshilt_page.dart';
+import 'package:application/score_page.dart';
+import 'package:application/turshilt_page.dart';
 
 void main() => runApp(const HomePage());
 
@@ -34,7 +36,7 @@ class CombinedScreen extends StatelessWidget {
       case "check":
         Navigator.push(
           context,
-          MaterialPageRoute(builder: ((context) => ScorePage())),
+          MaterialPageRoute(builder: ((context) => ScoreApp())),
         );
         break;
       default:
@@ -111,36 +113,6 @@ class CombinedScreen extends StatelessWidget {
                 ),
               ),
             ),
-            // SizedBox(height: 16),
-            // ElevatedButton(
-            //   onPressed: () {
-            //     // onScoringScreen(context, "check");
-            //   },
-            //   style: ElevatedButton.styleFrom(
-            //     primary: Colors.orange, // Customize button color
-            //   ),
-            //   child: Padding(
-            //     padding: const EdgeInsets.all(16.0),
-            //     child: Row(
-            //       mainAxisSize: MainAxisSize.min,
-            //       children: [
-            //         Icon(
-            //           Icons.check,
-            //           color: Colors.white,
-            //           size: 24.0,
-            //         ),
-            //         SizedBox(width: 10),
-            //         Text(
-            //           'CHECK',
-            //           style: TextStyle(
-            //             fontSize: 18,
-            //             color: Colors.white,
-            //           ),
-            //         ),
-            //       ],
-            //     ),
-            //   ),
-            // ),
             SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
