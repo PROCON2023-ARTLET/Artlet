@@ -1,7 +1,8 @@
 each level represents letter from mongolian national script 
-level_1 = 
-level_2 = 
-level_3 =  ...etc
-
+level_1 = letter-> middle_a
+level_2 = letter-> first_a
+level_3 = letter-> middle_o
+level_4 = letter-> last_i
+level_5 = letter-> last_o
 
 
