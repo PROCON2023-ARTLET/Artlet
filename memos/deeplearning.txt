@@ -1,0 +1,2 @@
+Our deeplearning model is based on xception and going modular but we 
+has a limited amount of datas it makes more difficult for training.
