@@ -40,7 +40,7 @@ class Level3 extends StatelessWidget {
             ),
             SizedBox(height: 20),
             Image.asset(
-              'assets/lvl1.png',
+              'assets/lvl3.png',
               width: 500,
               height: 500,
             ),
