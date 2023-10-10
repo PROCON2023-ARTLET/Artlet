@@ -1,0 +1,7 @@
+each level represents letter from mongolian national script 
+level_1 = 
+level_2 = 
+level_3 =  ...etc
+
+
+
